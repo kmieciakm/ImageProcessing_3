@@ -51,6 +51,30 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
             for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
                 ApplyDilation(photo.GetChannel(channel));
         }
+    }else if(command == "--erosion"){
+        if(argumentsAmount != 3){
+            std::cout << "Unexpected or missing argument";
+            exit(0);
+        }else{
+            for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                ApplyErosion(photo.GetChannel(channel));
+        }
+    }else if(command == "--opening"){
+        if(argumentsAmount != 3){
+            std::cout << "Unexpected or missing argument";
+            exit(0);
+        }else{
+            for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                ApplyOpening(photo.GetChannel(channel));
+        }
+    }else if(command == "--closing"){
+        if(argumentsAmount != 3){
+            std::cout << "Unexpected or missing argument";
+            exit(0);
+        }else{
+            for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                ApplyClosing(photo.GetChannel(channel));
+        }
     }else{
         std::cout << "Illigal command: " << command;
         exit(0);
