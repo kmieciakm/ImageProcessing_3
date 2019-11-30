@@ -1,6 +1,4 @@
 #include <iostream>
-#include <chrono>
-#include <stdlib.h>
 #include "../headers/proc.h"
 #include "../headers/converter.h"
 #include "../headers/functions.h"
@@ -43,37 +41,56 @@ std::string ExtractFilenameFromPath(std::string path){
 
 void ParseCommandAndRun(std::string command, int argumentsAmount, char *arguments[], Photo & photo){
     const int CHANNEL_AMOUNT = photo.GetChannelAmount();
-    if(command == "--dilation"){
+    if(command == "--dilation" || command == "--erosion" || command == "--opening" || command == "--closing"){
         if(argumentsAmount != 3){
             std::cout << "Unexpected or missing argument";
             exit(0);
         }else{
-            for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
-                ApplyDilation(photo.GetChannel(channel));
-        }
-    }else if(command == "--erosion"){
-        if(argumentsAmount != 3){
-            std::cout << "Unexpected or missing argument";
-            exit(0);
-        }else{
-            for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
-                ApplyErosion(photo.GetChannel(channel));
-        }
-    }else if(command == "--opening"){
-        if(argumentsAmount != 3){
-            std::cout << "Unexpected or missing argument";
-            exit(0);
-        }else{
-            for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
-                ApplyOpening(photo.GetChannel(channel));
-        }
-    }else if(command == "--closing"){
-        if(argumentsAmount != 3){
-            std::cout << "Unexpected or missing argument";
-            exit(0);
-        }else{
-            for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
-                ApplyClosing(photo.GetChannel(channel));
+            std::vector<std::vector<int>> mask;
+            mask.resize(3);
+            for(int depth = 0; depth < 3; depth++)
+                mask[depth].resize(3);
+            std::string sign;
+
+            std::cout << "Build 3x3 mask (0 - black, 1 - white, -1 - non consider):" << std::endl;
+            for(int j = 0; j<3 ; j++){
+                for(int i = 0; i<3; i++){
+                    do{
+                        std::cout <<  "(" << i << ", " << j << "): ";
+                        std::cin >> sign;
+                    }while(sign != "1" && sign != "0" && sign != "-1");
+                    if(sign == "1")
+                        mask[j][i] = 255;
+                    else
+                        mask[j][i] = atoi(sign.c_str());
+                }
+            }
+            // std::cout << "Your mask: " << std::endl;
+            // for(int j = 0; j<3 ; j++){
+            //     for(int i = 0; i<3; i++){
+            //         if(mask[j][i] >= 0)
+            //             std:: cout << " ";
+            //         std::cout << mask[j][i];
+            //     }
+            //     std::cout << std::endl;
+            // }
+
+            if(command=="--dilation"){
+                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                    ApplyDilation(photo.GetChannel(channel), mask);
+            }else if(command=="--erosion"){
+                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                    ApplyErosion(photo.GetChannel(channel), mask);
+            }else if(command=="--opening"){
+                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                    ApplyOpening(photo.GetChannel(channel), mask);
+            }else if(command=="--closing"){
+                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                    ApplyClosing(photo.GetChannel(channel), mask);
+            }else{
+                std::cout<<"unexpected error";
+                exit(0);
+            }
         }
     }else{
         std::cout << "Illigal command: " << command;

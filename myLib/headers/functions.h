@@ -2,10 +2,11 @@
 #define FUNCTIONS_H
 
 #include "./proc.h"
+#include <vector>
 
-void ApplyDilation(Channel&);
-void ApplyErosion(Channel&);
-void ApplyOpening(Channel&);
-void ApplyClosing(Channel&);
+void ApplyDilation(Channel&, std::vector<std::vector<int>>);
+void ApplyErosion(Channel&, std::vector<std::vector<int>>);
+void ApplyOpening(Channel&, std::vector<std::vector<int>>);
+void ApplyClosing(Channel&, std::vector<std::vector<int>>);
 
 #endif
