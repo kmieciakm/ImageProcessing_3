@@ -84,6 +84,14 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
                     ApplyHMTtransformation(photo.GetChannel(channel), version);
             }
         }
+    }else if(command == "--m4"){
+        if(argumentsAmount != 3){
+            std::cout << "Unexpected or missing argument";
+            exit(0);
+        }else{
+            for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                ApplyM4(photo.GetChannel(channel));
+        }
     }else{
         std::cout << "Illigal command: " << command;
         exit(0);
