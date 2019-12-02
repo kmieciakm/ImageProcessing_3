@@ -41,7 +41,7 @@ std::string ExtractFilenameFromPath(std::string path){
 
 void ParseCommandAndRun(std::string command, int argumentsAmount, char *arguments[], Photo & photo){
     const int CHANNEL_AMOUNT = photo.GetChannelAmount();
-    if(command == "--dilation" || command == "--erosion" || command == "--opening" || command == "--closing"){
+    if(command == "--dilation" || command == "--erosion" || command == "--opening" || command == "--closing" || command == "--hmt"){
         if(argumentsAmount != 3){
             std::cout << "Unexpected or missing argument";
             exit(0);
@@ -60,20 +60,11 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
                         std::cin >> sign;
                     }while(sign != "1" && sign != "0" && sign != "-1");
                     if(sign == "1")
-                        mask[j][i] = 255;
+                        mask[i][j] = 255;
                     else
-                        mask[j][i] = atoi(sign.c_str());
+                        mask[i][j] = atoi(sign.c_str());
                 }
-            }
-            // std::cout << "Your mask: " << std::endl;
-            // for(int j = 0; j<3 ; j++){
-            //     for(int i = 0; i<3; i++){
-            //         if(mask[j][i] >= 0)
-            //             std:: cout << " ";
-            //         std::cout << mask[j][i];
-            //     }
-            //     std::cout << std::endl;
-            // }
+            }            
 
             if(command=="--dilation"){
                 for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
@@ -87,6 +78,9 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
             }else if(command=="--closing"){
                 for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
                     ApplyClosing(photo.GetChannel(channel), mask);
+            }else if(command=="--hmt"){
+                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                    ApplyHMTtransformation(photo.GetChannel(channel), mask);
             }else{
                 std::cout<<"unexpected error";
                 exit(0);
