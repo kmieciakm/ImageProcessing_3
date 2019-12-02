@@ -4,12 +4,12 @@
 #include "./proc.h"
 #include <vector>
 
-void ApplyDilation(Channel&, std::vector<std::vector<int>>);
-void ApplyErosion(Channel&, std::vector<std::vector<int>>);
-void ApplyOpening(Channel&, std::vector<std::vector<int>>);
-void ApplyClosing(Channel&, std::vector<std::vector<int>>);
-void ApplyHMTtransformation(Channel&, std::vector<std::vector<int>>);
-Channel GetChannelComplement(Channel);
-void Intersection(Channel&, Channel);
+std::vector<std::vector<int>> GetMask(int);
+void ApplyDilation(Channel&, int);
+void ApplyErosion(Channel&, int);
+void ApplyOpening(Channel&, int);
+void ApplyClosing(Channel&, int);
+void ApplyHMTtransformation(Channel&, int);
+void ApplyChannelsSum(Channel&, std::vector<Channel>);
 
 #endif
