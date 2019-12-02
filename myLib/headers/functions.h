@@ -10,7 +10,6 @@ void ApplyErosion(Channel&, int);
 void ApplyOpening(Channel&, int);
 void ApplyClosing(Channel&, int);
 void ApplyHMTtransformation(Channel&, int);
-void ApplySimpleHMTtransformation(Channel&, int);
 void ApplyChannelsSum(Channel&, std::vector<Channel>);
 void ApplyM4(Channel&);
 bool AreChannelsEqual(Channel, Channel);

@@ -85,39 +85,6 @@ void ApplyClosing(Channel& _channel, int _version){
     ApplyErosion(_channel, _version);
 }
 
-
-void ApplySimpleHMTtransformation(Channel& _channel, int _maskVersion){
-    constexpr unsigned int MASK_AMOUNT = 4;
-    std::vector<std::vector<std::vector<int>>> masks;
-    masks.resize(MASK_AMOUNT);
-    masks[0] = { {255, -1, -1}, {255, 0, -1}, {255, -1, -1} };
-    masks[1] = { {255, 255, 255}, {-1, 0, -1}, {-1, -1, -1} };
-    masks[2] = { {-1, -1, 255}, {-1, 0, 255}, {-1, -1, 255} };
-    masks[3] = { {-1, -1, -1}, {-1, 0, -1}, {255, 255, 255} };
-    
-    Channel channelCopy = _channel;
-    
-    for(int x = 1; x < channelCopy.GetWidth()-1; x++){
-        for(int y = 1; y < channelCopy.GetHeight()-1; y++){
-            bool allMatches = true;
-            for(int i = -1; i <= 1; i++){
-                for(int j = -1; j <= 1; j++){
-                    if(masks[_maskVersion][i+1][j+1] != -1){
-                        if(masks[_maskVersion][i+1][j+1] != _channel.GetValue(x+i,y+j)){
-                            allMatches = false;
-                        }
-                    }   
-                }
-            }
-            if(allMatches)
-                channelCopy.SetValue(x, y, 255);
-            else
-                channelCopy.SetValue(x, y, 0);
-        }
-    }
-    _channel = channelCopy;
-}
-
 void ApplyHMTtransformation(Channel& _channel, int _version){
     int maskAmount;
     std::vector<std::vector<std::vector<int>>> masks;
@@ -185,25 +152,14 @@ void ApplyChannelsSum(Channel& _channel, std::vector<Channel> _channelsCopies){
 void ApplyM4(Channel& _channel){
     constexpr unsigned int MASK_VERSION = 11;
     std::vector<Channel> channels(1, _channel);
-    std::vector<Channel> D;
-    Channel Xk;
+    Channel Xk = _channel;
     Channel previousXk;
-    for(int i=0; i<4; i++){
-        Xk = _channel;
-        do{
-            previousXk = Xk;
-            ApplySimpleHMTtransformation(Xk, i);
-            ApplyChannelsSum(Xk, channels);
-        }while(!AreChannelsEqual(Xk, previousXk));
-        D.push_back(Xk);
-    }
-    ApplyChannelsSum(_channel, D);
-    // do{
-    //     previousXk = Xk;
-    //     ApplyHMTtransformation(Xk, MASK_VERSION);
-    //     ApplyChannelsSum(Xk, channels);
-    // }while(!AreChannelsEqual(Xk, previousXk));
-    // _channel = Xk;
+    do{
+        previousXk = Xk;
+        ApplyHMTtransformation(Xk, MASK_VERSION);
+        ApplyChannelsSum(Xk, channels);
+    }while(!AreChannelsEqual(Xk, previousXk));
+    _channel = Xk;
 }
 
 bool AreChannelsEqual(Channel _channel1, Channel _channel2){
