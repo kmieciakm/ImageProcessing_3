@@ -84,20 +84,6 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
                     ApplyHMTtransformation(photo.GetChannel(channel), version);
             }
         }
-    }else if(command == "--shmt"){
-        if(argumentsAmount != 4){
-            std::cout << "Unexpected or missing argument";
-            exit(0);
-        }else{          
-            if(!isIntNumber(static_cast<std::string>(arguments[3])) || std::stoi(static_cast<std::string>(arguments[3])) < 1 || std::stoi(static_cast<std::string>(arguments[3])) > 4){
-                std::cout << "Wrong argument type, possible values: 1,2,3,4";
-                exit(0);
-            }else{
-                int version = std::stoi(static_cast<std::string>(arguments[3]));
-                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
-                    ApplySimpleHMTtransformation(photo.GetChannel(channel), version-1);
-            }
-        }
     }else if(command == "--convex"){
         if(argumentsAmount != 3){
             std::cout << "Unexpected or missing argument";

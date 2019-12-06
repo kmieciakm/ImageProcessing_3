@@ -157,8 +157,8 @@ Channel GetChannelsSum(std::vector<Channel>& _channelsCopies){
     for(int x = 0; x < outputChannel.GetWidth(); x++){
         for(int y = 0; y < outputChannel.GetHeight(); y++){
             hasWhite = false;
-            for(Channel channel : _channelsCopies){
-                if(channel.GetValue(x,y) == 255){
+            for(int i = 0; i< _channelsCopies.size(); i++){
+                if(_channelsCopies[i].GetValue(x,y) == 255){
                     hasWhite = true;
                     break;
                 }
