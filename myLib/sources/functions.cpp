@@ -116,8 +116,8 @@ void ApplyHMTtransformation(Channel& _channel, int _version){
                 bool allMatches = true;
                 for(int i = -1; i <= 1; i++){
                     for(int j = -1; j <= 1; j++){
-                        if(masks[maskInx][i+1][j+1] != -1){
-                            if(masks[maskInx][i+1][j+1] != _channel.GetValue(x+i,y+j)){
+                        if(masks[maskInx][j+1][i+1] != -1){
+                            if(masks[maskInx][j+1][i+1] != _channel.GetValue(x+i,y+j)){
                                 allMatches = false;
                             }
                         }   
@@ -130,44 +130,87 @@ void ApplyHMTtransformation(Channel& _channel, int _version){
             }
         }
     }
-    ApplyChannelsSum(_channel, channelCopies);
+    _channel = GetChannelsSum(channelCopies);
 }
 
-void ApplyChannelsSum(Channel& _channel, std::vector<Channel> _channelsCopies){
-    for(int x = 0; x < _channel.GetWidth(); x++){
-        for(int y = 0; y < _channel.GetHeight(); y++){
-            bool whiteFind = false;
-            for(int i=0; i<_channelsCopies.size(); i++){
-                if(_channelsCopies[i].GetValue(x,y) == 255)
-                    whiteFind = true;  
-            }
-            if(whiteFind)
-                _channel.SetValue(x,y,255);
+void ApplyConvexHull(Channel& _channel){
+    Channel Xk;
+    Channel previousXk;
+    std::vector<Channel> D;
+    std::vector<Channel> channelsToSum;
+    for(int i=0; i<4; i++){
+        Xk = _channel;
+        do{
+            previousXk = Xk;
+            ApplySimpleHMTtransformation(Xk, i);
+            channelsToSum = {Xk, previousXk};
+            Xk = GetChannelsSum(channelsToSum);
+        }while(!AreChannelsEqual(Xk, previousXk));
+        D.push_back(Xk);
+    }
+    _channel = GetChannelsSum(D);
+}
+
+Channel GetChannelsSum(std::vector<Channel>& _channelsCopies){
+    Channel outputChannel = _channelsCopies[0];
+    bool hasWhite;
+    for(int x = 0; x < outputChannel.GetWidth(); x++){
+        for(int y = 0; y < outputChannel.GetHeight(); y++){
+            hasWhite = false;
+            for(Channel channel : _channelsCopies){
+                if(channel.GetValue(x,y) == 255){
+                    hasWhite = true;
+                    break;
+                }
+            }  
+            if(hasWhite)
+                outputChannel.SetValue(x,y,255);
             else
-                _channel.SetValue(x,y,0);          
+                outputChannel.SetValue(x,y,0);   
         }
     }
+    return outputChannel;
 }
 
-void ApplyM4(Channel& _channel){
-    constexpr unsigned int MASK_VERSION = 11;
-    std::vector<Channel> channels(1, _channel);
-    Channel Xk = _channel;
-    Channel previousXk;
-    do{
-        previousXk = Xk;
-        ApplyHMTtransformation(Xk, MASK_VERSION);
-        ApplyChannelsSum(Xk, channels);
-    }while(!AreChannelsEqual(Xk, previousXk));
-    _channel = Xk;
-}
-
-bool AreChannelsEqual(Channel _channel1, Channel _channel2){
-    for(int x = 0; x < _channel1.GetWidth(); x++){
-        for(int y = 0; y < _channel1.GetHeight(); y++){
+bool AreChannelsEqual(Channel& _channel1, Channel& _channel2){
+    for(int x = 1; x < _channel1.GetWidth()-1; x++){
+        for(int y = 1; y < _channel1.GetHeight()-1; y++){
             if(_channel1.GetValue(x,y) != _channel2.GetValue(x,y))
                 return false;
         }
     }
     return true;
+}
+
+void ApplySimpleHMTtransformation(Channel& _channel, int _maskVersion){
+    constexpr unsigned int MASK_AMOUNT = 4;
+    std::vector<std::vector<std::vector<int>>> masks;
+    masks.resize(MASK_AMOUNT);
+    masks[0] = { {255, -1, -1}, {255, 0, -1}, {255, -1, -1} };
+    masks[1] = { {255, 255, 255}, {-1, 0, -1}, {-1, -1, -1} };
+    masks[2] = { {-1, -1, 255}, {-1, 0, 255}, {-1, -1, 255} };
+    masks[3] = { {-1, -1, -1}, {-1, 0, -1}, {255, 255, 255} };
+    
+    Channel channelCopy = _channel;
+    
+    for(int x = 1; x < channelCopy.GetWidth()-1; x++){
+        for(int y = 1; y < channelCopy.GetHeight()-1; y++){
+            bool allMatches = true;
+            for(int i = -1; i <= 1; i++){
+                for(int j = -1; j <= 1; j++){
+                    if(masks[_maskVersion][j+1][i+1] != -1){
+                        if(masks[_maskVersion][j+1][i+1] != _channel.GetValue(x+i,y+j)){
+                            allMatches = false;
+                            break;
+                        }
+                    }   
+                }
+            }
+            if(allMatches)
+                channelCopy.SetValue(x, y, 255);
+            else
+                channelCopy.SetValue(x, y, 0);
+        }
+    }
+    _channel = channelCopy;
 }

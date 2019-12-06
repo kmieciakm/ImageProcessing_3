@@ -53,8 +53,8 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
             }else{
                 int version = std::stoi(static_cast<std::string>(arguments[3]));
                 if(command=="--dilation"){
-                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
-                    ApplyDilation(photo.GetChannel(channel), version);
+                    for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                        ApplyDilation(photo.GetChannel(channel), version);
                 }else if(command=="--erosion"){
                     for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
                         ApplyErosion(photo.GetChannel(channel), version);
@@ -75,7 +75,7 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
             std::cout << "Unexpected or missing argument";
             exit(0);
         }else{          
-            if(!isIntNumber(static_cast<std::string>(arguments[3])) && std::stoi(static_cast<std::string>(arguments[3])) != 11 && std::stoi(static_cast<std::string>(arguments[3])) != 12){
+            if(!isIntNumber(static_cast<std::string>(arguments[3])) || std::stoi(static_cast<std::string>(arguments[3])) != 11 && std::stoi(static_cast<std::string>(arguments[3])) != 12){
                 std::cout << "Wrong argument type, possible values: 11,12";
                 exit(0);
             }else{
@@ -84,13 +84,27 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
                     ApplyHMTtransformation(photo.GetChannel(channel), version);
             }
         }
-    }else if(command == "--m4"){
+    }else if(command == "--shmt"){
+        if(argumentsAmount != 4){
+            std::cout << "Unexpected or missing argument";
+            exit(0);
+        }else{          
+            if(!isIntNumber(static_cast<std::string>(arguments[3])) || std::stoi(static_cast<std::string>(arguments[3])) < 1 || std::stoi(static_cast<std::string>(arguments[3])) > 4){
+                std::cout << "Wrong argument type, possible values: 1,2,3,4";
+                exit(0);
+            }else{
+                int version = std::stoi(static_cast<std::string>(arguments[3]));
+                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                    ApplySimpleHMTtransformation(photo.GetChannel(channel), version-1);
+            }
+        }
+    }else if(command == "--convex"){
         if(argumentsAmount != 3){
             std::cout << "Unexpected or missing argument";
             exit(0);
         }else{
             for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
-                ApplyM4(photo.GetChannel(channel));
+                ApplyConvexHull(photo.GetChannel(channel));
         }
     }else{
         std::cout << "Illigal command: " << command;
