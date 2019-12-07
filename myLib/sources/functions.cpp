@@ -192,7 +192,6 @@ void ApplySimpleHMTtransformation(Channel& _channel, int _maskVersion){
     masks[3] = { {-1, -1, -1}, {-1, 0, -1}, {255, 255, 255} };
     
     Channel channelCopy = _channel;
-    
     for(int x = 1; x < channelCopy.GetWidth()-1; x++){
         for(int y = 1; y < channelCopy.GetHeight()-1; y++){
             bool allMatches = true;
@@ -213,4 +212,46 @@ void ApplySimpleHMTtransformation(Channel& _channel, int _maskVersion){
         }
     }
     _channel = channelCopy;
+}
+
+void ApplyGlobalRegionGrowing(Channel& _channel, int _minIntensity, int _maxIntensity){
+    for(int x = 0; x < _channel.GetWidth(); x++){
+        for(int y = 0; y < _channel.GetHeight(); y++){
+            if(_channel.GetValue(x,y) <= _maxIntensity && _channel.GetValue(x,y) >= _minIntensity)
+                _channel.SetValue(x,y,255);
+            else
+                _channel.SetValue(x,y,0);            
+        }
+    }
+}
+
+void ApplyRegionGrowing(Channel& _channel, int _seedX, int _seedY, int _minIntensity, int _maxIntensity){
+    Channel global = _channel;
+    ApplyGlobalRegionGrowing(global, _minIntensity, _maxIntensity);
+
+    Channel output(_channel.GetWidth(),_channel.GetHeight());
+    for(int x = 0; x < output.GetWidth(); x++){
+        for(int y = 0; y < output.GetHeight(); y++){
+            output.SetValue(x,y,0);
+        }
+    }
+
+    global.SetValue(_seedX, _seedY, 255);
+    Recursive(output, global, _seedX, _seedY);
+    _channel = output;
+}
+
+void Recursive(Channel& _channel, Channel& _global, short _x, short _y){
+    if(_channel.GetValue(_x, _y) == 255 || _global.GetValue(_x, _y) != 255 
+       || _x == 0 || _x == _channel.GetWidth()-1 || _y == 0 || _y == _channel.GetHeight()-1) {
+        return;
+    } else {
+        _channel.SetValue(_x, _y, 255);
+        for(int i = -1; i <= 1; i++){
+            for(int j = -1; j <= 1; j++){ 
+                Recursive(_channel, _global, _x+i, _y+j);
+            }
+        }
+    }
+    return;
 }

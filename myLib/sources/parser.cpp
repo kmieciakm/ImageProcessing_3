@@ -92,6 +92,28 @@ void ParseCommandAndRun(std::string command, int argumentsAmount, char *argument
             for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
                 ApplyConvexHull(photo.GetChannel(channel));
         }
+    }else if(command == "--growing"){
+        if(argumentsAmount != 7){
+            std::cout << "Unexpected or missing argument";
+            exit(0);
+        }else{          
+            if(!isIntNumber(static_cast<std::string>(arguments[3])) || !isIntNumber(static_cast<std::string>(arguments[4])) 
+            || !isIntNumber(static_cast<std::string>(arguments[5])) || !isIntNumber(static_cast<std::string>(arguments[6])) 
+            || std::stoi(static_cast<std::string>(arguments[3])) < 0 || std::stoi(static_cast<std::string>(arguments[3])) > photo.GetWidth() 
+            || std::stoi(static_cast<std::string>(arguments[4])) < 0 || std::stoi(static_cast<std::string>(arguments[4])) > photo.GetHeight()
+            || std::stoi(static_cast<std::string>(arguments[5])) < 0 || std::stoi(static_cast<std::string>(arguments[5])) > 255
+            || std::stoi(static_cast<std::string>(arguments[6])) < 0 || std::stoi(static_cast<std::string>(arguments[6])) > 255){
+                std::cout << "Wrong argument type, consider that width equals: " << photo.GetWidth() << " and height: " << photo.GetHeight();
+                exit(0);
+            }else{
+                int seedX = std::stoi(static_cast<std::string>(arguments[3])) - 1;
+                int seedY = std::stoi(static_cast<std::string>(arguments[4])) - 1;
+                int minIntensity = std::stoi(static_cast<std::string>(arguments[5]));
+                int maxIntensity = std::stoi(static_cast<std::string>(arguments[6]));
+                for(int channel = 0; channel < CHANNEL_AMOUNT; channel++)
+                    ApplyRegionGrowing(photo.GetChannel(channel), seedX, seedY, minIntensity, maxIntensity);
+            }
+        }
     }else{
         std::cout << "Illigal command: " << command;
         exit(0);
